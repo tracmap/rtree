@@ -1,6 +1,6 @@
 package com.github.davidmoten.rtree2.internal;
 
-import java.awt.geom.Line2D;
+import com.github.davidmoten.rtree2.internal.Line2D;
 
 public final class RectangleUtil {
 
@@ -43,7 +43,7 @@ public final class RectangleUtil {
     public static boolean rectangleIntersectsLine(double rectX, double rectY, double rectWidth, double rectHeight,
             double x1, double y1, double x2, double y2) {
         return _rectangleIntersectsLine(rectX, rectY, rectWidth, rectHeight, x1, y1, x2, y2)
-                || Line2D.Double.linesIntersect(rectX, rectY, rectX + rectWidth, rectY + rectHeight, x1, y1, x2, y2);
+                || Line2D.linesIntersect(rectX, rectY, rectX + rectWidth, rectY + rectHeight, x1, y1, x2, y2);
     }
     
     private static boolean _rectangleIntersectsLine(double rectX, double rectY, double rectWidth,

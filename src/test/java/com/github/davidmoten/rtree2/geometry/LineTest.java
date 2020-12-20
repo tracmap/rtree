@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.awt.geom.Line2D;
+import com.github.davidmoten.rtree2.internal.Line2D;
 
 import org.junit.Test;
 
@@ -193,31 +193,18 @@ public final class LineTest {
     public void testLineDoesIntersectPoint() {
         assertTrue(Geometries.line(1.5, 1.5, 2.5, 2.5).intersects(point(2, 2)));
     }
-    
+
     @Test
     public void testLineDoubleIntersectsWithHorizontalLine() {
-        {  // test expectation on Line2D.Double.intersectsLine which we depend on 
-            Line2D.Double line = new Line2D.Double(35.0d, -25.0d, 45.0d, -25.0d);
-            assertTrue(line.intersectsLine(40.0d, -20.0d, 45.0d, -40.0d));
+        {  // test expectation on Line2D.intersectsLine which we depend on
+            Line2D line  = new Line2D(35.0d, -25.0d, 45.0d, -25.0d);
+            Line2D line2 = new Line2D(40.0d, -20.0d, 45.0d, -40.0d);
+            assertTrue(line.intersectsLine(line2));
         }
         {
             Line line = Geometries.line(40.0d, -20.0d, 45.0d, -40.0d);
             Line horizontalLine = Geometries.line(35.0d, -25.0d, 45.0d, -25.0d);
-            
-            assertTrue(line.intersects(horizontalLine.mbr()));
-        }
-    }
-    
-    @Test
-    public void testLineFloatIntersectsWithHorizontalLine() {
-        {  // test expectation on Line2D.Double.intersectsLine which we depend on 
-            Line2D.Float line = new Line2D.Float(35.0f, -25.0f, 45.0f, -25.0f);
-            assertTrue(line.intersectsLine(40.0f, -20.0f, 45.0f, -40.0f));
-        }
-        {
-            Line line = Geometries.line(40.0f, -20.0f, 45.0f, -40.0f);
-            Line horizontalLine = Geometries.line(35.0f, -25.0f, 45.0f, -25.0f);
-            
+
             assertTrue(line.intersects(horizontalLine.mbr()));
         }
     }
