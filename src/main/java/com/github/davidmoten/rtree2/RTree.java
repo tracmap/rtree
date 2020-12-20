@@ -693,7 +693,14 @@ public final class RTree<T, S extends Geometry> {
      */
     public <R extends Geometry> Iterable<Entry<T, S>> search(final R g,
             final BiPredicate<? super S, ? super R> intersects) {
-        return Iterables.filter(search(g.mbr()), entry -> intersects.test(entry.geometry(), g));
+        Iterable<Entry<T, S>> entries = search(g.mbr());
+        ArrayList<Entry<T, S>> result = new ArrayList<Entry<T, S>>();
+        for (Entry<T, S> entry : entries) {
+            if (intersects.test(entry.geometry(), g)) {
+                result.add(entry);
+            }
+        }
+        return result;
     }
 
     /**
@@ -747,12 +754,12 @@ public final class RTree<T, S extends Geometry> {
      *            and R.
      * @return entries strictly less than maxDistance from g
      */
-    public <R extends Geometry> Iterable<Entry<T, S>> search(final R g, final double maxDistance,
+    /*public <R extends Geometry> Iterable<Entry<T, S>> search(final R g, final double maxDistance,
             BiFunction<? super S, ? super R, Double> distance) {
         return Iterables.filter( //
                 search(entry -> entry.distance(g.mbr()) < maxDistance), // refine with distance function
                 entry -> distance.apply(entry.geometry(), g) < maxDistance);
-    }
+    }*/
 
     /**
      * Returns the nearest k entries (k=maxCount) to the given rectangle where the
