@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+import java.util.logging.*;
 
 import com.github.davidmoten.guavamini.Lists;
 import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
@@ -22,6 +23,7 @@ import com.github.davidmoten.rtree2.geometry.HasGeometry;
 import com.github.davidmoten.rtree2.geometry.Intersects;
 import com.github.davidmoten.rtree2.geometry.Line;
 import com.github.davidmoten.rtree2.geometry.Point;
+import com.github.davidmoten.rtree2.geometry.Polygon;
 import com.github.davidmoten.rtree2.geometry.Rectangle;
 import com.github.davidmoten.rtree2.internal.Comparators;
 import com.github.davidmoten.rtree2.internal.NodeAndEntries;
@@ -674,6 +676,10 @@ public final class RTree<T, S extends Geometry> {
         return search(circle, Intersects.geometryIntersectsCircle);
     }
 
+    public Iterable<Entry<T, S>> search(Polygon polygon) {
+        return search(polygon, Intersects.geometryIntersectsPolygon);
+    }
+
     public Iterable<Entry<T, S>> search(Line line) {
         return search(line, Intersects.geometryIntersectsLine);
     }
@@ -693,12 +699,14 @@ public final class RTree<T, S extends Geometry> {
      */
     public <R extends Geometry> Iterable<Entry<T, S>> search(final R g,
             final BiPredicate<? super S, ? super R> intersects) {
+
+        //Logger.getLogger("RTREE").log(Level.WARNING, "search() is called");
+
         Iterable<Entry<T, S>> entries = search(g.mbr());
         ArrayList<Entry<T, S>> result = new ArrayList<Entry<T, S>>();
         for (Entry<T, S> entry : entries) {
-            if (intersects.test(entry.geometry(), g)) {
+            if (intersects.test(entry.geometry(), g))
                 result.add(entry);
-            }
         }
         return result;
     }
@@ -737,29 +745,6 @@ public final class RTree<T, S extends Geometry> {
     public Iterable<Entry<T, S>> search(final Point p, final double maxDistance) {
         return search(p.mbr(), maxDistance);
     }
-
-    /**
-     * Returns all entries strictly less than <code>maxDistance</code> from the
-     * given geometry. Because the geometry may be of an arbitrary type it is
-     * necessary to also pass a distance function.
-     * 
-     * @param <R>
-     *            type of the geometry being searched for
-     * @param g
-     *            geometry to search for entries within maxDistance of
-     * @param maxDistance
-     *            strict max distance that entries must be from g
-     * @param distance
-     *            function to calculate the distance between geometries of type S
-     *            and R.
-     * @return entries strictly less than maxDistance from g
-     */
-    /*public <R extends Geometry> Iterable<Entry<T, S>> search(final R g, final double maxDistance,
-            BiFunction<? super S, ? super R, Double> distance) {
-        return Iterables.filter( //
-                search(entry -> entry.distance(g.mbr()) < maxDistance), // refine with distance function
-                entry -> distance.apply(entry.geometry(), g) < maxDistance);
-    }*/
 
     /**
      * Returns the nearest k entries (k=maxCount) to the given rectangle where the
