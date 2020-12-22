@@ -695,34 +695,6 @@ public class RTreeTest {
     }
 
     @Test
-    public void testSearchWithDistanceFunctionIntersectsMbrButNotActualGeometry() {
-        RTree<Integer, Point> tree = RTree.<Integer, Point>create().add(1, point(0, 0)).add(2, point(1, 1));
-
-        Observable<Entry<Integer, Point>> entries = Observable
-                .from(tree.search(circle(0, 0, 1), 0.1, distanceCircleToPoint));
-        assertEquals(1, (int) entries.count().toBlocking().single());
-    }
-
-    @Test
-    public void testSearchWithDistanceFunctionIntersectsMbrAndActualGeometry() {
-        RTree<Integer, Point> tree = RTree.<Integer, Point>create().add(1, point(0, 0)).add(2,
-                point(1, 1));
-
-        Observable<Entry<Integer, Point>> entries = Observable.from(tree.search(circle(0, 0, 1), 0.5,
-                distanceCircleToPoint));
-        assertEquals(2, (int) entries.count().toBlocking().single());
-    }
-
-    @Test
-    public void testSearchWithDistanceFunctionIntersectsNothing() {
-        RTree<Integer, Point> tree = RTree.<Integer, Point>create().add(1, point(0, 0)).add(2, point(1, 1));
-
-        Observable<Entry<Integer, Point>> entries = Observable
-                .from(tree.search(circle(10, 10, 1), 0.5, distanceCircleToPoint));
-        assertEquals(0, (int) entries.count().toBlocking().single());
-    }
-
-    @Test
     public void calculateDepthOfEmptyTree() {
         RTree<Object, Geometry> tree = RTree.create();
         assertEquals(0, tree.calculateDepth());

@@ -16,6 +16,12 @@ Build
 mvn clean compile assembly:single
 ```
 
+Run tests
+------------
+```bash
+mvn test
+```
+
 Deploy
 ------------
 Copy the assembled JAR file into the commonLibraries module of the TML repo.

@@ -23,6 +23,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.target>1.6</maven.compiler.target>
+        <maven.compiler.testTarget>1.8</maven.compiler.testTarget>
         <scm.url>scm:git:https://github.com/davidmoten/rtree2.git</scm.url>
         <slf4j.version>1.7.12</slf4j.version>
 
@@ -251,12 +252,14 @@
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${compiler.version}</version>
-                <configuration>
-                    <source>${maven.compiler.target}</source>
-                    <target>${maven.compiler.target}</target>
-                </configuration>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <version>${compiler.version}</version>
+              <configuration>
+                <source>${maven.compiler.target}</source>
+                <target>${maven.compiler.target}</target>
+                <testSource>${maven.compiler.testTarget}</testSource>
+                <testTarget>${maven.compiler.testTarget}</testTarget>
+              </configuration>
             </plugin>
             <plugin>
               <artifactId>maven-assembly-plugin</artifactId>
