@@ -4,4 +4,4 @@
 .settings
 /bin/
 .idea
-rtree.iml
+*.iml
