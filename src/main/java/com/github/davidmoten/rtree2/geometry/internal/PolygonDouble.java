@@ -66,18 +66,8 @@ public final class PolygonDouble implements Polygon {
     }
 
     @Override
-    public boolean intersects(Rectangle r) {
-        throw new RuntimeException("not implemented");
-    }
-
-    @Override
     public boolean intersects(Circle c) {
         throw new RuntimeException("not implemented");
-    }
-
-    @Override
-    public boolean intersects(Polygon p) {
-        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
@@ -140,6 +130,28 @@ public final class PolygonDouble implements Polygon {
                 return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean intersects(Polygon polygon) {
+        // handle the case when the other polygon is fully inside this polygon
+        if (intersects(PointDouble.create(polygon.mbr().x1(), polygon.mbr().y1())))
+            return true;
+        // check if the other polygon intersects any of the edges of this polygon
+        int n = points.size();
+        for (int i = 0; i < n; i++) {
+            PointDouble cur = points.get(i);
+            PointDouble next = points.get((i + 1) % n);
+            LineDouble edge = LineDouble.create(cur.x(), cur.y(), next.x(), next.y());
+            if (polygon.intersects(edge))
+                return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean intersects(Rectangle r) {
+        return intersects(PolygonDouble.create(new double[]{r.x1(), r.y1(), r.x1(), r.y2(), r.x2(), r.y2(), r.x2(), r.y1()}));
     }
 
     @Override
