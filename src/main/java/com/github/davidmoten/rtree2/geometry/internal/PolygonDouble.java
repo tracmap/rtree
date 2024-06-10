@@ -168,12 +168,6 @@ public final class PolygonDouble implements Polygon {
         return true;
     }
 
-    private static int cosineSign(Point a, Point b, Point c) {
-        double cosine = (b.x() - a.x()) * (c.y() - a.y()) - (b.y() - a.y()) * (c.x() - a.x());
-        if (Math.abs(cosine) < PRECISION) return 0;
-        return cosine > 0.0 ? 1 : -1;
-    }
-
     /**
      * Return the orientation of point b relative to the path a -> c.
      * @param a origin point
