@@ -61,11 +61,6 @@ public final class PolygonDouble implements Polygon {
     }
 
     @Override
-    public double distance(Rectangle r) {
-        throw new RuntimeException("not implemented");
-    }
-
-    @Override
     public boolean intersects(Circle c) {
         throw new RuntimeException("not implemented");
     }
@@ -152,6 +147,20 @@ public final class PolygonDouble implements Polygon {
     @Override
     public boolean intersects(Rectangle r) {
         return intersects(PolygonDouble.create(new double[]{r.x1(), r.y1(), r.x1(), r.y2(), r.x2(), r.y2(), r.x2(), r.y1()}));
+    }
+
+    @Override
+    public double distance(Rectangle r) {
+        if (intersects(r)) return 0.0;
+        int n = points.size();
+        double minDistance = 1e18;
+        for (int i = 0; i < n; i++) {
+            PointDouble cur = points.get(i);
+            PointDouble next = points.get((i + 1) % n);
+            LineDouble edge = LineDouble.create(cur.x(), cur.y(), next.x(), next.y());
+            minDistance = Math.min(minDistance, edge.distance(r));
+        }
+        return minDistance;
     }
 
     @Override
