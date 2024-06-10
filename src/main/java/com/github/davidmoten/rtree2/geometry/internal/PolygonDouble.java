@@ -5,6 +5,9 @@ import com.github.davidmoten.rtree2.internal.util.ObjectsHelper;
 
 import java.util.ArrayList;
 
+/**
+ * A convex polygon shell.
+ */
 public final class PolygonDouble implements Polygon {
 
     private final ArrayList<PointDouble> points;
@@ -12,35 +15,49 @@ public final class PolygonDouble implements Polygon {
 
     private static final double PRECISION = 0.00000001;
 
-    private PolygonDouble(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
+    private PolygonDouble(double[] coordinates) {
+        if (coordinates.length % 2 != 0 || coordinates.length < 6)
+            throw new IllegalArgumentException("expecting an even number of coordinate points of at least 6");
         points = new ArrayList<>();
-        points.add(PointDouble.create(x1, y1));
-        points.add(PointDouble.create(x2, y2));
-        points.add(PointDouble.create(x3, y3));
-        points.add(PointDouble.create(x4, y4));
-        mbr = RectangleDouble.create(Math.min(Math.min(x1, x2), Math.min(x3, x4)),
-                                     Math.min(Math.min(y1, y2), Math.min(y3, y4)),
-                                     Math.max(Math.max(x1, x2), Math.max(x3, x4)),
-                                     Math.max(Math.max(y1, y2), Math.max(y3, y4)));
+        double minX = coordinates[0];
+        double maxX = coordinates[0];
+        double minY = coordinates[1];
+        double maxY = coordinates[1];
+        PointDouble lastPoint = PointDouble.create(coordinates[0], coordinates[1]);
+        points.add(lastPoint);
+        for (int i = 2; i < coordinates.length - 1; i += 2) {
+            // be nice to users and just ignore duplicate points
+            if (coordinates[i] == lastPoint.x() && coordinates[i + 1] == lastPoint.y()) continue;
+            minX = Math.min(minX, coordinates[i]);
+            maxX = Math.max(maxX, coordinates[i]);
+            minY = Math.min(minY, coordinates[i + 1]);
+            maxY = Math.max(maxY, coordinates[i + 1]);
+            lastPoint = PointDouble.create(coordinates[i], coordinates[i + 1]);
+            points.add(lastPoint);
+        }
+        // don't break if the polygon was closed
+        if (points.get(0).equals(lastPoint))
+            points.remove(points.size() - 1);
+        // final check to make sure the polygon remains valid after removing duplicates
+        if (points.size() < 3) throw new IllegalArgumentException("fewer than 3 unique polygon points provided");
+        // currently the implementation is only for convex polygons
+        if (!convexPoints()) throw new UnsupportedOperationException("only implemented for convex polygons");
+        mbr = RectangleDouble.create(minX, minY, maxX, maxY);
     }
 
-    public static PolygonDouble create(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
-        return new PolygonDouble(x1, y1, x2, y2, x3, y3, x4, y4);
+    /**
+     * Constructor for a convex polygon shell.
+     * @param coordinates An array of x1, y1, x2, y2, ... xn, yn that make the un-closed shell of a convex polygon.
+     *                    As it is a polygon, at least 3 pairs of points are required (6 values).
+     * @return convex polygon shell
+     */
+    public static PolygonDouble create(double[] coordinates) {
+        return new PolygonDouble(coordinates);
     }
 
     @Override
     public Rectangle mbr() {
         return mbr;
-    }
-
-    @Override
-    public double distance(Rectangle r) {
-        throw new RuntimeException("not implemented");
-    }
-
-    @Override
-    public boolean intersects(Rectangle r) {
-        throw new RuntimeException("not implemented");
     }
 
     @Override
@@ -65,26 +82,40 @@ public final class PolygonDouble implements Polygon {
     @Override
     public boolean intersects(Point point) {
         int n = points.size();
-        if (n < 3)
-            return false;
 
-        int firstSign = cosineSign(points.get(n - 1), point, points.get(0));
-        if (firstSign == 0)
-            return false;
+        int firstDirection = pointsDirection(points.get(n - 1), point, points.get(0));
+        if (firstDirection == 0)
+            return true;
 
         for (int i = 0; i < n - 1; i++) {
-            int sign = cosineSign(points.get(i), point, points.get(i + 1));
-            if (sign == 0 || sign != firstSign)
-                return false;
+            int sign = pointsDirection(points.get(i), point, points.get(i + 1));
+            if (sign == 0) return true;
+            if (sign != firstDirection) return false;
         }
 
         return true;
     }
 
+    private boolean convexPoints() {
+        int n = points.size();
+        int overallDirection = 0;
+
+        for (int i = 0; i < n - 1; i++) {
+            int direction = pointsDirection(points.get(i), points.get((i + 2) % n), points.get(i + 1));
+            if (direction != 0) {
+                if (overallDirection == 0) overallDirection = direction;
+                else if (direction != overallDirection) return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public boolean intersects(Line line) {
+        // handle the case when the line is fully inside the polygon
         if (intersects(PointDouble.create(line.x1(), line.y1())))
             return true;
+        // check if the line intersects any of the edges of this polygon
         int n = points.size();
         for (int i = 0; i < n; i++) {
             PointDouble cur = points.get(i);
@@ -97,13 +128,56 @@ public final class PolygonDouble implements Polygon {
     }
 
     @Override
+    public boolean intersects(Polygon polygon) {
+        // handle the case when the other polygon is fully inside this polygon
+        if (intersects(PointDouble.create(polygon.mbr().x1(), polygon.mbr().y1())))
+            return true;
+        // check if the other polygon intersects any of the edges of this polygon
+        int n = points.size();
+        for (int i = 0; i < n; i++) {
+            PointDouble cur = points.get(i);
+            PointDouble next = points.get((i + 1) % n);
+            LineDouble edge = LineDouble.create(cur.x(), cur.y(), next.x(), next.y());
+            if (polygon.intersects(edge))
+                return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean intersects(Rectangle r) {
+        return intersects(PolygonDouble.create(new double[]{r.x1(), r.y1(), r.x1(), r.y2(), r.x2(), r.y2(), r.x2(), r.y1()}));
+    }
+
+    @Override
+    public double distance(Rectangle r) {
+        if (intersects(r)) return 0.0;
+        int n = points.size();
+        double minDistance = 1e18;
+        for (int i = 0; i < n; i++) {
+            PointDouble cur = points.get(i);
+            PointDouble next = points.get((i + 1) % n);
+            LineDouble edge = LineDouble.create(cur.x(), cur.y(), next.x(), next.y());
+            minDistance = Math.min(minDistance, edge.distance(r));
+        }
+        return minDistance;
+    }
+
+    @Override
     public boolean isDoublePrecision() {
         return true;
     }
 
-    private static int cosineSign(Point a, Point b, Point c) {
-        double cosine = (b.x() - a.x()) * (c.y() - a.y()) - (b.y() - a.y()) * (c.x() - a.x());
-        if (Math.abs(cosine) < PRECISION) return 0;
-        return cosine > 0.0 ? 1 : -1;
+    /**
+     * Return the orientation of point b relative to the path a -> c.
+     * @param a origin point
+     * @param b point to determine if it is to the left, right or along the path
+     * @param c point we are facing from a
+     * @return 0 if b is on the line a->c, -1 if b is to the left of a facing c or 1 if to the right.
+     */
+    private static int pointsDirection(Point a, Point b, Point c) {
+        double crossProduct = (b.x() - a.x()) * (c.y() - a.y()) - (b.y() - a.y()) * (c.x() - a.x());
+        if (Math.abs(crossProduct) < PRECISION) return 0;
+        return crossProduct > 0.0 ? 1 : -1;
     }
 }
