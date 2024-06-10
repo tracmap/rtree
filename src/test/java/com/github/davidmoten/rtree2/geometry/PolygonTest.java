@@ -50,21 +50,21 @@ public final class PolygonTest {
     public void testDoesNotIntersectHorizontalLine() {
         Polygon a = Geometries.polygon(SIMPLE_SQUARE);
         Line b = Geometries.line(-0.5, 5, 0.5, 5);
-        assertTrue(!a.intersects(b));
+        assertFalse(a.intersects(b));
     }
 
     @Test
     public void testDoesNotIntersectVerticalLine() {
         Polygon a = Geometries.polygon(SIMPLE_SQUARE);
         Line b = Geometries.line(-4, 0, -4, 5);
-        assertTrue(!a.intersects(b));
+        assertFalse(a.intersects(b));
     }
 
     @Test
     public void testDoesNotIntersectArbitraryLine() {
         Polygon a = Geometries.polygon(SIMPLE_SQUARE);
         Line b = Geometries.line(0.1, 2.2, 10.7, 3.1);
-        assertTrue(!a.intersects(b));
+        assertFalse(a.intersects(b));
     }
 
     @Test
@@ -72,7 +72,7 @@ public final class PolygonTest {
         // Check that line is treated like a segment rather than an infinite line
         Polygon a = Geometries.polygon(SIMPLE_SQUARE);
         Line b = Geometries.line(0.5, 5.0, 0.5, 10.1);
-        assertTrue(!a.intersects(b));
+        assertFalse(a.intersects(b));
     }
 
     @Test
@@ -93,7 +93,35 @@ public final class PolygonTest {
     public void testDoesNotIntersectPoint() {
         Polygon a = Geometries.polygon(SIMPLE_SQUARE_DUPLICATES);
         Point b = Geometries.point(-2.5, 3.2);
-        assertTrue(!a.intersects(b));
+        assertFalse(a.intersects(b));
+    }
+
+    @Test
+    public void testDoesIntersectPolygon() {
+        Polygon a = Geometries.polygon(SIMPLE_SQUARE);
+        Polygon b = Geometries.polygon(new double[]{0.5, 0.5, 2, 0.5, 2, 2, 0.5, 2});
+        assertTrue(a.intersects(b));
+    }
+
+    @Test
+    public void testDoesNotIntersectPolygon() {
+        Polygon a = Geometries.polygon(SIMPLE_SQUARE);
+        Polygon b = Geometries.polygon(new double[]{1.5, 1.5, 2, 1.5, 2, 2, 1.5, 2});
+        assertFalse(a.intersects(b));
+    }
+
+    @Test
+    public void testDoesIntersectRectangle() {
+        Polygon a = Geometries.polygon(SIMPLE_SQUARE);
+        Rectangle b = Geometries.rectangle(0.5, 0.5, 2, 2);
+        assertTrue(a.intersects(b));
+    }
+
+    @Test
+    public void testDoesNotIntersectRectangle() {
+        Polygon a = Geometries.polygon(SIMPLE_SQUARE);
+        Rectangle b = Geometries.rectangle(1.5, 1.5, 2, 2);
+        assertFalse(a.intersects(b));
     }
 
     @Test
