@@ -125,6 +125,20 @@ public final class PolygonTest {
     }
 
     @Test
+    public void testRectangleZeroDistance() {
+        Polygon a = Geometries.polygon(SIMPLE_SQUARE);
+        Rectangle b = Geometries.rectangle(0.5, 0.5, 2, 2);
+        assertEquals(0.0, a.distance(b), PRECISION);
+    }
+
+    @Test
+    public void testRectangleNonZeroDistance() {
+        Polygon a = Geometries.polygon(SIMPLE_SQUARE);
+        Rectangle b = Geometries.rectangle(1.5, 1.5, 2, 2);
+        assertEquals(0.70710678, a.distance(b), PRECISION);
+    }
+
+    @Test
     public void testPolygonMbr() {
         Polygon a = Geometries.polygon(SIMPLE_SQUARE_DUPLICATES);
         Rectangle mbr = a.mbr();
