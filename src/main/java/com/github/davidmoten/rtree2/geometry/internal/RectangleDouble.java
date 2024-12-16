@@ -132,4 +132,9 @@ public final class RectangleDouble implements Rectangle {
         return true;
     }
 
+    @Override
+    public boolean isOnePoint() {
+        return x1 == x2 && y1 == y2;
+    }
+
 }

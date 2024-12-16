@@ -22,4 +22,6 @@ public interface Rectangle extends Geometry, HasGeometry {
     
     boolean isDoublePrecision();
 
+    boolean isOnePoint();
+
 }

@@ -151,4 +151,8 @@ public final class PointFloat implements Point {
         return y;
     }
 
+    @Override
+    public boolean isOnePoint() {
+        return true;
+    }
 }

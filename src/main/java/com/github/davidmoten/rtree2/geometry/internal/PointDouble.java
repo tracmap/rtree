@@ -106,6 +106,11 @@ public final class PointDouble implements Point {
     }
 
     @Override
+    public boolean isOnePoint() {
+        return true;
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;

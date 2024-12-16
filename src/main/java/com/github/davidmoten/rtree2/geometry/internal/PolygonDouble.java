@@ -146,6 +146,7 @@ public final class PolygonDouble implements Polygon {
 
     @Override
     public boolean intersects(Rectangle r) {
+        if (r.isOnePoint()) return intersects(PointDouble.create(r.x1(), r.y1()));
         return intersects(PolygonDouble.create(new double[]{r.x1(), r.y1(), r.x1(), r.y2(), r.x2(), r.y2(), r.x2(), r.y1()}));
     }
 
