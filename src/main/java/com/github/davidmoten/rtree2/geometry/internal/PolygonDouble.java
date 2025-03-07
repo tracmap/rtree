@@ -130,7 +130,7 @@ public final class PolygonDouble implements Polygon {
     @Override
     public boolean intersects(Polygon polygon) {
         // handle the case when the other polygon is fully inside this polygon
-        if (intersects(PointDouble.create(polygon.mbr().x1(), polygon.mbr().y1())))
+        if (intersects(polygon.firstPoint()))
             return true;
         // check if the other polygon intersects any of the edges of this polygon
         int n = points.size();
@@ -180,5 +180,10 @@ public final class PolygonDouble implements Polygon {
         double crossProduct = (b.x() - a.x()) * (c.y() - a.y()) - (b.y() - a.y()) * (c.x() - a.x());
         if (Math.abs(crossProduct) < PRECISION) return 0;
         return crossProduct > 0.0 ? 1 : -1;
+    }
+
+    @Override
+    public Point firstPoint() {
+        return points.get(0);
     }
 }

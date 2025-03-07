@@ -10,4 +10,6 @@ public interface Polygon extends Geometry {
 
     boolean intersects(Polygon polygon);
 
+    Point firstPoint();
+
 }
